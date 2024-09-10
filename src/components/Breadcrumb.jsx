@@ -4,7 +4,7 @@ import { FaHome } from "react-icons/fa"; // You can use any icon from react-icon
 
 const Breadcrumb = ({ currentPage }) => {
 	return (
-		<nav className="bg-dark py-4 flex justify-center items-center mb-6 xs:text-sm md:text-2xl">
+		<nav className="bg-dark py-4 px-4 flex justify-center items-center mb-6  xs:text-sm md:text-2xl">
 			<Link
 				to="/"
 				className="text-tertiary hover:underline flex items-start"
