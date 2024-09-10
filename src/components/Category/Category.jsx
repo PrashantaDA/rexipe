@@ -17,7 +17,7 @@ const Category = ({ title, categories }) => {
 		>
 			<div className="w-[90%] mx-auto">
 				<h2 className="text-5xl font-bold mb-4 text-center text-dark drop-shadow-lg">{title}</h2>
-				<div className="w-[80%] mx-auto flex flex-wrap justify-between items-center gap-6 p-4 bg-primary rounded-lg shadow-lg">
+				<div className="xs:w-[90%] lg:w-[50%] mx-auto flex flex-wrap justify-center items-center gap-10 p-4 bg-primary rounded-lg shadow-lg">
 					{categories.map((category) => (
 						<NavLink
 							key={category.name}
