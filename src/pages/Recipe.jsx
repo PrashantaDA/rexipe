@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaClock, FaUsers, FaHeart, FaList, FaBookOpen } from "react-icons/fa";
 import Breadcrumb from "../components/Breadcrumb";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+import ErrorState from "../components/common/ErrorState";
+import { pageVariants, containerVariants, itemVariants, fadeInUp, hoverScale } from "../utils/animations";
+import { commonStyles } from "../utils/styles";
 
 const Recipe = () => {
 	const { id } = useParams();
@@ -33,27 +38,15 @@ const Recipe = () => {
 	}, [id]);
 
 	if (isLoading) {
-		return (
-			<div className="flex min-h-[60vh] items-center justify-center">
-				<motion.div
-					animate={{ rotate: 360 }}
-					transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-					className="h-12 w-12 rounded-full border-4 border-accent border-t-transparent"
-				/>
-			</div>
-		);
+		return <LoadingSpinner />;
 	}
 
 	if (error) {
 		return (
-			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				className="glass-effect mx-auto mt-8 max-w-2xl rounded-xl p-8 text-center shadow-xl"
-			>
-				<h2 className="mb-4 text-2xl font-bold text-accent">Oops! Something went wrong</h2>
-				<p className="text-normal/80">{error}</p>
-			</motion.div>
+			<ErrorState
+				message={error}
+				onRetry={() => window.location.reload()}
+			/>
 		);
 	}
 
@@ -63,18 +56,16 @@ const Recipe = () => {
 
 	const renderIngredients = () => (
 		<motion.ul
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			transition={{ staggerChildren: 0.1 }}
+			variants={containerVariants}
+			initial="hidden"
+			animate="visible"
 			className="space-y-3"
 		>
 			{extendedIngredients?.map((ingredient, index) => (
 				<motion.li
 					key={index}
-					initial={{ opacity: 0, x: -20 }}
-					animate={{ opacity: 1, x: 0 }}
-					transition={{ delay: index * 0.05 }}
-					className="glass-effect flex items-center gap-3 rounded-lg p-3 text-normal/90"
+					variants={itemVariants}
+					className={`${commonStyles.card} flex items-center gap-3`}
 				>
 					<span className="h-2 w-2 rounded-full bg-accent" />
 					{`${ingredient.amount} ${ingredient.unit} ${ingredient.name}`}
@@ -85,31 +76,28 @@ const Recipe = () => {
 
 	const renderInstructions = () => (
 		<motion.ol
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			transition={{ staggerChildren: 0.1 }}
+			variants={containerVariants}
+			initial="hidden"
+			animate="visible"
 			className="space-y-4"
 		>
 			{analyzedInstructions.length > 0 ? (
 				analyzedInstructions[0].steps.map((step, index) => (
 					<motion.li
 						key={index}
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: index * 0.1 }}
-						className="glass-effect rounded-lg p-4"
+						variants={itemVariants}
+						className={commonStyles.card}
 					>
 						<div className="mb-2 flex items-center gap-3">
 							<span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm font-bold text-primary">{index + 1}</span>
 							<h4 className="font-semibold text-accent">Step {index + 1}</h4>
 						</div>
-						<p className="text-normal/90">{step.step}</p>
+						<p className={commonStyles.body}>{step.step}</p>
 					</motion.li>
 				))
 			) : (
 				<motion.p
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
+					variants={itemVariants}
 					className="text-center text-normal/60"
 				>
 					No instructions available.
@@ -118,56 +106,71 @@ const Recipe = () => {
 		</motion.ol>
 	);
 
+	const stats = [
+		{ icon: <FaClock className="h-5 w-5" />, label: "Cook Time", value: `${readyInMinutes} mins` },
+		{ icon: <FaUsers className="h-5 w-5" />, label: "Servings", value: `${servings} servings` },
+		{ icon: <FaHeart className="h-5 w-5" />, label: "Health Score", value: `${healthScore}%` },
+	];
+
 	return (
 		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 0.5 }}
-			className="min-h-screen bg-gradient-to-b from-primary to-primary/95"
+			variants={pageVariants}
+			initial="hidden"
+			animate="visible"
+			exit="exit"
+			className={commonStyles.gradientBg}
 		>
+			{/* Background Pattern */}
+			<div className={commonStyles.dotPattern} />
+
 			<Breadcrumb currentPage={title} />
 
-			<div className="container mx-auto px-4 py-8">
+			<div className={commonStyles.container}>
 				{/* Recipe Header */}
 				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5 }}
-					className="mb-8 text-center"
+					variants={containerVariants}
+					initial="hidden"
+					animate="visible"
+					className="mb-12 text-center"
 				>
-					<h1 className="mb-4 font-handlee text-4xl font-bold text-accent md:text-5xl">{title}</h1>
+					<motion.h1
+						variants={itemVariants}
+						className={commonStyles.heading1}
+					>
+						{title}
+					</motion.h1>
 
 					{/* Recipe Stats */}
-					<div className="glass-effect mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-4 rounded-xl p-4">
-						<div className="flex items-center gap-2">
-							<span className="text-accent">⏱️</span>
-							<span className="text-normal/90">{readyInMinutes} mins</span>
-						</div>
-						<div className="flex items-center gap-2">
-							<span className="text-accent">👥</span>
-							<span className="text-normal/90">{servings} servings</span>
-						</div>
-						<div className="flex items-center gap-2">
-							<span className="text-accent">❤️</span>
-							<span className="text-normal/90">{healthScore}% healthy</span>
-						</div>
-					</div>
+					<motion.div
+						variants={itemVariants}
+						className={`${commonStyles.glassCard} mx-auto mt-6 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-3`}
+					>
+						{stats.map((stat, index) => (
+							<motion.div
+								key={stat.label}
+								variants={fadeInUp}
+								transition={{ delay: index * 0.1 }}
+								className="flex flex-col items-center gap-2"
+							>
+								<div className="text-accent">{stat.icon}</div>
+								<span className="text-sm text-normal/60">{stat.label}</span>
+								<span className="font-semibold text-normal">{stat.value}</span>
+							</motion.div>
+						))}
+					</motion.div>
 				</motion.div>
 
 				{/* Main Content */}
 				<div className="grid gap-8 lg:grid-cols-2">
 					{/* Left Column - Image and Summary */}
 					<motion.div
-						initial={{ opacity: 0, x: -20 }}
-						animate={{ opacity: 1, x: 0 }}
-						transition={{ duration: 0.5, delay: 0.2 }}
+						variants={containerVariants}
+						initial="hidden"
+						animate="visible"
 						className="space-y-6"
 					>
 						<motion.div
-							initial={{ opacity: 0, scale: 0.95 }}
-							animate={{ opacity: 1, scale: 1 }}
-							transition={{ duration: 0.5 }}
+							variants={itemVariants}
 							className="overflow-hidden rounded-xl shadow-xl"
 						>
 							<img
@@ -178,14 +181,12 @@ const Recipe = () => {
 						</motion.div>
 
 						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.5, delay: 0.3 }}
-							className="glass-effect rounded-xl p-6"
+							variants={itemVariants}
+							className={commonStyles.glassCard}
 						>
-							<h2 className="mb-4 font-handlee text-2xl font-bold text-accent">About this Recipe</h2>
+							<h2 className={`${commonStyles.heading2} mb-4`}>About this Recipe</h2>
 							<div
-								className="prose prose-invert max-w-none text-normal/90"
+								className={`${commonStyles.body} prose prose-invert max-w-none`}
 								dangerouslySetInnerHTML={{ __html: summary }}
 							/>
 						</motion.div>
@@ -193,31 +194,47 @@ const Recipe = () => {
 
 					{/* Right Column - Ingredients and Instructions */}
 					<motion.div
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0 }}
-						transition={{ duration: 0.5, delay: 0.2 }}
+						variants={containerVariants}
+						initial="hidden"
+						animate="visible"
 						className="space-y-6"
 					>
-						<div className="glass-effect rounded-xl p-6">
+						<div className={commonStyles.glassCard}>
 							{/* Tab Navigation */}
 							<div className="mb-6 flex gap-4">
-								{["ingredients", "instructions"].map((tab) => (
+								{[
+									{ id: "ingredients", icon: <FaList className="h-5 w-5" />, label: "Ingredients" },
+									{ id: "instructions", icon: <FaBookOpen className="h-5 w-5" />, label: "Instructions" },
+								].map((tab) => (
 									<motion.button
-										key={tab}
-										whileHover={{ scale: 1.05 }}
-										whileTap={{ scale: 0.95 }}
-										className={`rounded-lg px-6 py-2 font-semibold transition-all duration-300 ${
-											activeTab === tab ? "bg-accent text-primary" : "bg-card text-normal hover:bg-card-hover"
+										key={tab.id}
+										variants={hoverScale}
+										whileHover="hover"
+										whileTap="tap"
+										className={`flex items-center gap-2 rounded-lg px-6 py-2 font-semibold transition-all duration-300 ${
+											activeTab === tab.id ? "bg-accent text-primary" : "bg-card text-normal hover:bg-card-hover"
 										}`}
-										onClick={() => setActiveTab(tab)}
+										onClick={() => setActiveTab(tab.id)}
 									>
-										{tab.charAt(0).toUpperCase() + tab.slice(1)}
+										{tab.icon}
+										{tab.label}
 									</motion.button>
 								))}
 							</div>
 
 							{/* Tab Content */}
-							<div className="mt-6">{activeTab === "ingredients" ? renderIngredients() : renderInstructions()}</div>
+							<AnimatePresence mode="wait">
+								<motion.div
+									key={activeTab}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -20 }}
+									transition={{ duration: 0.2 }}
+									className="mt-6"
+								>
+									{activeTab === "ingredients" ? renderIngredients() : renderInstructions()}
+								</motion.div>
+							</AnimatePresence>
 						</div>
 					</motion.div>
 				</div>

@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { FaRandom, FaUtensils, FaSync, FaTrash, FaClock } from "react-icons/fa";
+import { FaRandom, FaUtensils, FaClock, FaSync, FaTrash } from "react-icons/fa";
 import Card from "../components/Card";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+import ErrorState from "../components/common/ErrorState";
+import { pageVariants, containerVariants, itemVariants } from "../utils/animations";
+import { commonStyles } from "../utils/styles";
 
 const CACHE_KEY = "featured_recipes";
 const CACHE_TIMESTAMP_KEY = "featured_recipes_timestamp";
@@ -95,72 +99,31 @@ const Featured = () => {
 		fetchRandomRecipes();
 	}, []);
 
-	const containerVariants = {
-		hidden: { opacity: 0 },
-		visible: {
-			opacity: 1,
-			transition: {
-				staggerChildren: 0.1,
-			},
-		},
-	};
-
-	const itemVariants = {
-		hidden: { opacity: 0, y: 20 },
-		visible: {
-			opacity: 1,
-			y: 0,
-			transition: {
-				duration: 0.5,
-			},
-		},
-	};
-
-	if (isLoading && !isRefreshing) {
-		return (
-			<div className="flex min-h-[60vh] items-center justify-center">
-				<motion.div
-					animate={{ rotate: 360 }}
-					transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-					className="h-12 w-12 rounded-full border-4 border-accent border-t-transparent"
-				/>
-			</div>
-		);
+	if (isLoading) {
+		return <LoadingSpinner />;
 	}
 
 	if (error) {
 		return (
-			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				className="glass-effect mx-auto mt-8 max-w-2xl rounded-xl p-8 text-center shadow-xl"
-			>
-				<h2 className="mb-4 text-2xl font-bold text-accent">Oops! Something went wrong</h2>
-				<p className="mb-4 text-normal/80">{error}</p>
-				<button
-					onClick={() => fetchRandomRecipes(true)}
-					className="rounded-full bg-accent px-6 py-2 text-primary transition-colors hover:bg-accent/90"
-				>
-					Try Again
-				</button>
-			</motion.div>
+			<ErrorState
+				message={error}
+				onRetry={() => fetchRandomRecipes(true)}
+			/>
 		);
 	}
 
 	return (
 		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 0.5 }}
-			className="min-h-screen bg-gradient-to-b from-primary to-primary/95 py-12"
+			variants={pageVariants}
+			initial="hidden"
+			animate="visible"
+			exit="exit"
+			className={commonStyles.gradientBg}
 		>
 			{/* Background Pattern */}
-			<div className="absolute inset-0 opacity-5">
-				<div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,#fff_1px,transparent_0)] bg-[size:40px_40px]" />
-			</div>
+			<div className={commonStyles.dotPattern} />
 
-			<div className="container relative mx-auto px-4">
+			<div className={commonStyles.container}>
 				{/* Header Section */}
 				<motion.div
 					variants={containerVariants}
@@ -168,49 +131,52 @@ const Featured = () => {
 					animate="visible"
 					className="mb-12 text-center"
 				>
-					<div className="mb-4 flex items-center justify-center gap-4">
-						<motion.div
-							variants={itemVariants}
-							className="inline-block rounded-full bg-accent/10 p-4"
-						>
-							<FaRandom className="h-8 w-8 text-accent" />
-						</motion.div>
-						<div className="flex gap-2">
-							<motion.button
-								variants={itemVariants}
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-								onClick={() => fetchRandomRecipes(true)}
-								disabled={isRefreshing}
-								className="rounded-full bg-accent/10 p-2 text-accent transition-colors hover:bg-accent/20 disabled:opacity-50"
-								title="Refresh Recipes"
-							>
-								<FaSync className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`} />
-							</motion.button>
-							<motion.button
-								variants={itemVariants}
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-								onClick={clearCache}
-								className="rounded-full bg-accent/10 p-2 text-accent transition-colors hover:bg-accent/20"
-								title="Clear Cache"
-							>
-								<FaTrash className="h-5 w-5" />
-							</motion.button>
-						</div>
-					</div>
+					<motion.div
+						variants={itemVariants}
+						className="mb-6 inline-block"
+					>
+						<FaRandom className="h-12 w-12 text-accent" />
+					</motion.div>
 					<motion.h1
 						variants={itemVariants}
-						className="mb-4 font-handlee text-4xl font-bold text-accent md:text-5xl"
+						className={commonStyles.heading1}
 					>
 						Featured Recipes
 					</motion.h1>
 					<motion.p
 						variants={itemVariants}
-						className="mx-auto max-w-2xl text-lg text-normal/80"
+						className={commonStyles.subtitle}
 					>
-						Discover a curated selection of random recipes to inspire your next culinary adventure.
+						Discover our daily curated selection of delicious recipes
 					</motion.p>
+
+					{/* Action Buttons */}
+					<motion.div
+						variants={itemVariants}
+						className="mt-6 flex flex-wrap items-center justify-center gap-4"
+					>
+						<motion.button
+							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.95 }}
+							onClick={() => fetchRandomRecipes(true)}
+							disabled={isRefreshing}
+							className={`${commonStyles.button.primary} flex items-center gap-2`}
+						>
+							<FaSync className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+							Refresh Recipes
+						</motion.button>
+						<motion.button
+							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.95 }}
+							onClick={clearCache}
+							className={`${commonStyles.button.secondary} flex items-center gap-2`}
+						>
+							<FaTrash className="h-4 w-4" />
+							Clear Cache
+						</motion.button>
+					</motion.div>
+
+					{/* Last Updated */}
 					{lastUpdated && (
 						<motion.div
 							variants={itemVariants}
@@ -231,7 +197,7 @@ const Featured = () => {
 							exit={{ opacity: 0, y: 50 }}
 							className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 transform"
 						>
-							<div className="glass-effect rounded-full px-6 py-3 text-accent shadow-lg">{toastMessage}</div>
+							<div className={commonStyles.glassCard}>{toastMessage}</div>
 						</motion.div>
 					)}
 				</AnimatePresence>
@@ -241,7 +207,7 @@ const Featured = () => {
 					variants={containerVariants}
 					initial="hidden"
 					animate="visible"
-					className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+					className={commonStyles.grid.responsive}
 				>
 					{recipes.map((recipe) => (
 						<motion.div
@@ -268,17 +234,19 @@ const Featured = () => {
 				{recipes.length === 0 && (
 					<motion.div
 						variants={itemVariants}
-						className="glass-effect mx-auto mt-12 max-w-md rounded-xl p-8 text-center"
+						className={commonStyles.empty}
 					>
 						<FaUtensils className="mx-auto mb-4 h-12 w-12 text-accent" />
-						<h3 className="mb-2 text-xl font-bold text-accent">No Recipes Found</h3>
+						<h3 className={commonStyles.heading3}>No Recipes Found</h3>
 						<p className="mb-4 text-normal/80">We couldn&apos;t find any recipes at the moment. Please try again later.</p>
-						<button
+						<motion.button
+							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.95 }}
 							onClick={() => fetchRandomRecipes(true)}
-							className="rounded-full bg-accent px-6 py-2 text-primary transition-colors hover:bg-accent/90"
+							className={commonStyles.button.primary}
 						>
 							Try Again
-						</button>
+						</motion.button>
 					</motion.div>
 				)}
 			</div>
