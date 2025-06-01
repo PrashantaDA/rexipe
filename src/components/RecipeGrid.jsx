@@ -26,7 +26,7 @@ const RecipeGrid = ({ title, items }) => {
 								transition={{ duration: 0.3 }}
 							>
 								<Card
-									img={item.image}
+									image={item.image || item.img}
 									title={item.title}
 									id={item.id}
 									readyInMinutes={item.readyInMinutes}

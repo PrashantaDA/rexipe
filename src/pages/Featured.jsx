@@ -10,6 +10,7 @@ import { commonStyles } from "../utils/styles";
 
 const CACHE_KEY = "featured_recipes";
 const CACHE_TIMESTAMP_KEY = "featured_recipes_timestamp";
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 const Featured = () => {
 	const [recipes, setRecipes] = useState([]);
@@ -24,33 +25,52 @@ const Featured = () => {
 		const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
 		if (!timestamp) return false;
 
-		const lastFetchDate = new Date(parseInt(timestamp));
-		const currentDate = new Date();
-
-		return lastFetchDate.getDate() === currentDate.getDate() && lastFetchDate.getMonth() === currentDate.getMonth() && lastFetchDate.getFullYear() === currentDate.getFullYear();
+		const lastFetchTime = parseInt(timestamp);
+		const currentTime = Date.now();
+		return currentTime - lastFetchTime < CACHE_DURATION;
 	};
 
 	const getCachedRecipes = () => {
-		const cachedData = localStorage.getItem(CACHE_KEY);
-		const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-		if (timestamp) {
-			setLastUpdated(new Date(parseInt(timestamp)));
+		try {
+			const cachedData = localStorage.getItem(CACHE_KEY);
+			const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+			if (cachedData && timestamp) {
+				const recipes = JSON.parse(cachedData);
+				setLastUpdated(new Date(parseInt(timestamp)));
+				return recipes;
+			}
+		} catch (err) {
+			console.error("Error reading cache:", err);
+			clearCache(); // Clear invalid cache
 		}
-		return cachedData ? JSON.parse(cachedData) : null;
+		return null;
 	};
 
 	const cacheRecipes = (recipesData) => {
-		const timestamp = Date.now();
-		localStorage.setItem(CACHE_KEY, JSON.stringify(recipesData));
-		localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
-		setLastUpdated(new Date(timestamp));
+		try {
+			const timestamp = Date.now();
+			localStorage.setItem(CACHE_KEY, JSON.stringify(recipesData));
+			localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
+			setLastUpdated(new Date(timestamp));
+		} catch (err) {
+			console.error("Error caching recipes:", err);
+			showToastMessage("Failed to cache recipes. Please try again.");
+		}
 	};
 
 	const clearCache = () => {
-		localStorage.removeItem(CACHE_KEY);
-		localStorage.removeItem(CACHE_TIMESTAMP_KEY);
-		setLastUpdated(null);
-		showToastMessage("Cache cleared successfully!");
+		try {
+			localStorage.removeItem(CACHE_KEY);
+			localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+			setLastUpdated(null);
+			setRecipes([]); // Clear recipes from state
+			showToastMessage("Cache cleared successfully!");
+			// Fetch new recipes after clearing cache
+			fetchRandomRecipes(true);
+		} catch (err) {
+			console.error("Error clearing cache:", err);
+			showToastMessage("Failed to clear cache. Please try again.");
+		}
 	};
 
 	const showToastMessage = (message) => {
@@ -64,10 +84,10 @@ const Featured = () => {
 			setIsLoading(true);
 			setError(null);
 
-			// Check if we have valid cached data and not forcing refresh
+			// Check cache only if not forcing refresh
 			if (!forceRefresh && isCacheValid()) {
 				const cachedRecipes = getCachedRecipes();
-				if (cachedRecipes) {
+				if (cachedRecipes && cachedRecipes.length > 0) {
 					setRecipes(cachedRecipes);
 					setIsLoading(false);
 					return;
@@ -76,19 +96,32 @@ const Featured = () => {
 
 			setIsRefreshing(true);
 			const response = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${import.meta.env.VITE_API_KEY}&number=18&tags=main course`);
+
 			if (!response.ok) {
-				throw new Error("Failed to fetch recipes. Please try again later.");
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(errorData.message || "Failed to fetch recipes. Please try again later.");
 			}
+
 			const data = await response.json();
 			const recipesData = data.recipes || [];
 
+			if (recipesData.length === 0) {
+				throw new Error("No recipes found. Please try again.");
+			}
+
 			cacheRecipes(recipesData);
 			setRecipes(recipesData);
-			showToastMessage("Recipes updated successfully!");
+			showToastMessage(forceRefresh ? "Recipes refreshed successfully!" : "Recipes loaded successfully!");
 		} catch (err) {
 			console.error("Error fetching recipes:", err);
 			setError(err.message);
-			showToastMessage("Failed to update recipes. Please try again.");
+			showToastMessage(err.message || "Failed to update recipes. Please try again.");
+			// If there's an error and we have cached data, use it as fallback
+			const cachedRecipes = getCachedRecipes();
+			if (cachedRecipes && cachedRecipes.length > 0) {
+				setRecipes(cachedRecipes);
+				showToastMessage("Using cached recipes due to fetch error.");
+			}
 		} finally {
 			setIsLoading(false);
 			setIsRefreshing(false);
@@ -155,25 +188,23 @@ const Featured = () => {
 						variants={itemVariants}
 						className="mt-6 flex flex-wrap items-center justify-center gap-4"
 					>
-						<motion.button
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
+						<button
+							type="button"
 							onClick={() => fetchRandomRecipes(true)}
 							disabled={isRefreshing}
-							className={`${commonStyles.button.primary} flex items-center gap-2`}
+							className={`${commonStyles.button.primary} flex items-center gap-2 relative z-10`}
 						>
 							<FaSync className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-							Refresh Recipes
-						</motion.button>
-						<motion.button
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
+							<span>Refresh Recipes</span>
+						</button>
+						<button
+							type="button"
 							onClick={clearCache}
-							className={`${commonStyles.button.secondary} flex items-center gap-2`}
+							className={`${commonStyles.button.secondary} flex items-center gap-2 relative z-10`}
 						>
 							<FaTrash className="h-4 w-4" />
-							Clear Cache
-						</motion.button>
+							<span>Clear Cache</span>
+						</button>
 					</motion.div>
 
 					{/* Last Updated */}
@@ -218,7 +249,7 @@ const Featured = () => {
 						>
 							<Link to={`/recipe/${recipe.id}`}>
 								<Card
-									img={recipe.image}
+									image={recipe.image}
 									title={recipe.title}
 									id={recipe.id}
 									readyInMinutes={recipe.readyInMinutes}
@@ -239,14 +270,13 @@ const Featured = () => {
 						<FaUtensils className="mx-auto mb-4 h-12 w-12 text-accent" />
 						<h3 className={commonStyles.heading3}>No Recipes Found</h3>
 						<p className="mb-4 text-normal/80">We couldn&apos;t find any recipes at the moment. Please try again later.</p>
-						<motion.button
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
+						<button
+							type="button"
 							onClick={() => fetchRandomRecipes(true)}
-							className={commonStyles.button.primary}
+							className={`${commonStyles.button.primary} relative z-10`}
 						>
 							Try Again
-						</motion.button>
+						</button>
 					</motion.div>
 				)}
 			</div>
