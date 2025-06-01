@@ -2,9 +2,11 @@ import Home from "./Home";
 import Recipe from "./Recipe";
 import Searched from "./Searched";
 import Cuisine from "./Cuisine";
+import NotFound from "./NotFound";
 import { Route, Routes } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import Featured from "./Featured";
 
 const Pages = () => {
 	const location = useLocation();
@@ -19,7 +21,10 @@ const Pages = () => {
 					path="/"
 					element={<Home />}
 				/>
-
+				<Route
+					path="/featured"
+					element={<Featured />}
+				/>
 				<Route
 					path="/:type/:name"
 					element={<Cuisine />}
@@ -34,7 +39,7 @@ const Pages = () => {
 				/>
 				<Route
 					path="*"
-					element={<div>404</div>}
+					element={<NotFound />}
 				/>
 			</Routes>
 		</AnimatePresence>

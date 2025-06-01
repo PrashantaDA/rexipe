@@ -28,6 +28,10 @@ const RecipeGrid = ({ title, items }) => {
 								<Card
 									img={item.image}
 									title={item.title}
+									id={item.id}
+									readyInMinutes={item.readyInMinutes}
+									servings={item.servings}
+									healthScore={item.healthScore}
 								/>
 							</motion.div>
 						</Link>

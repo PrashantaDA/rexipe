@@ -1,46 +1,47 @@
-import { FaPizzaSlice, FaHamburger } from "react-icons/fa";
-import { FaBowlRice } from "react-icons/fa6";
-import { GiChopsticks, GiNoodles, GiBowlOfRice } from "react-icons/gi";
+import { FaPizzaSlice, FaPepperHot, FaDrumstickBite, FaFish, FaBreadSlice, FaLeaf } from "react-icons/fa";
 import Category from "./Category";
 
-const cuisineCategories = [
-	{
-		name: "Italian",
-		path: "/cuisine/Italian",
-		icon: <FaPizzaSlice className="text-3xl" />,
-	},
-	{
-		name: "American",
-		path: "/cuisine/American",
-		icon: <FaHamburger className="text-3xl" />,
-	},
-	{
-		name: "Thai",
-		path: "/cuisine/Thai",
-		icon: <FaBowlRice className="text-3xl" />,
-	},
-	{
-		name: "Japanese",
-		path: "/cuisine/Japanese",
-		icon: <GiChopsticks className="text-3xl" />,
-	},
-	{
-		name: "Indian",
-		path: "/cuisine/Indian",
-		icon: <GiBowlOfRice className="text-3xl" />,
-	},
-	{
-		name: "Korean",
-		path: "/cuisine/Korean",
-		icon: <GiNoodles className="text-3xl" />,
-	},
-];
+const CuisineCategory = () => {
+	const categories = [
+		{
+			name: "Italian",
+			path: "/cuisine/Italian",
+			icon: <FaPizzaSlice className="text-3xl" />,
+		},
+		{
+			name: "Mexican",
+			path: "/cuisine/Mexican",
+			icon: <FaPepperHot className="text-3xl" />,
+		},
+		{
+			name: "Chinese",
+			path: "/cuisine/Chinese",
+			icon: <FaDrumstickBite className="text-3xl" />,
+		},
+		{
+			name: "Japanese",
+			path: "/cuisine/Japanese",
+			icon: <FaFish className="text-3xl" />,
+		},
+		{
+			name: "Indian",
+			path: "/cuisine/Indian",
+			icon: <FaBreadSlice className="text-3xl" />,
+		},
+		{
+			name: "Thai",
+			path: "/cuisine/Thai",
+			icon: <FaLeaf className="text-3xl" />,
+		},
+	];
 
-const CuisineCategory = () => (
-	<Category
-		title="Cuisine Categories"
-		categories={cuisineCategories}
-	/>
-);
+	return (
+		<Category
+			title="Cuisine Categories"
+			categories={categories}
+			type="cuisine"
+		/>
+	);
+};
 
 export default CuisineCategory;

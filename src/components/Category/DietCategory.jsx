@@ -1,42 +1,47 @@
-import { FaLeaf, FaCarrot } from "react-icons/fa";
-import { GiChickenLeg, GiFoodChain } from "react-icons/gi";
-import { TbMeat } from "react-icons/tb";
+import { FaLeaf, FaSeedling, FaWheat, FaFire, FaAppleAlt, FaFish } from "react-icons/fa";
 import Category from "./Category";
 
-const dietCategories = [
-	{
-		name: "Vegan",
-		path: "/diet/Vegan",
-		icon: <FaCarrot className="text-3xl" />,
-	},
+const DietCategory = () => {
+	const categories = [
+		{
+			name: "Vegan",
+			path: "/diet/Vegan",
+			icon: <FaLeaf className="text-3xl" />,
+		},
+		{
+			name: "Vegetarian",
+			path: "/diet/Vegetarian",
+			icon: <FaSeedling className="text-3xl" />,
+		},
+		{
+			name: "Gluten Free",
+			path: "/diet/Gluten-Free",
+			icon: <FaWheat className="text-3xl" />,
+		},
+		{
+			name: "Keto",
+			path: "/diet/Keto",
+			icon: <FaFire className="text-3xl" />,
+		},
+		{
+			name: "Paleo",
+			path: "/diet/Paleo",
+			icon: <FaAppleAlt className="text-3xl" />,
+		},
+		{
+			name: "Mediterranean",
+			path: "/diet/Mediterranean",
+			icon: <FaFish className="text-3xl" />,
+		},
+	];
 
-	{
-		name: "Vegetarian",
-		path: "/diet/Vegetarian",
-		icon: <FaLeaf className="text-3xl" />,
-	},
-	{
-		name: "Keto",
-		path: "/diet/Keto",
-		icon: <GiChickenLeg className="text-3xl" />,
-	},
-	{
-		name: "Pescetarian",
-		path: "/diet/Pescetarian",
-		icon: <GiFoodChain className="text-3xl" />,
-	},
-	{
-		name: "Paleo",
-		path: "/diet/Paleo",
-		icon: <TbMeat className="text-3xl" />,
-	},
-];
-
-const DietCategory = () => (
-	<Category
-		title="Diet Categories"
-		categories={dietCategories}
-	/>
-);
+	return (
+		<Category
+			title="Diet Categories"
+			categories={categories}
+			type="diet"
+		/>
+	);
+};
 
 export default DietCategory;
