@@ -47,10 +47,8 @@ const useSavedRecipes = () => {
 	}, [globalSavedRecipes]);
 
 	const saveRecipe = useCallback((recipe) => {
-		console.log("Attempting to save recipe:", recipe);
 		// Check if recipe is already saved
 		if (!globalSavedRecipes.some((r) => r.id === recipe.id)) {
-			console.log("Adding new recipe to saved recipes:", recipe);
 			globalSavedRecipes = [...globalSavedRecipes, recipe];
 			notifyListeners();
 		} else {
