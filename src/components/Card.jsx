@@ -1,33 +1,27 @@
-/* eslint-disable react/prop-types */
 import { motion } from "framer-motion";
 
 const Card = ({ img, title }) => {
 	return (
-		<div>
+		<div className="modern-card group cursor-pointer">
 			<motion.div
-				whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(0, 0, 0, 0.3)" }}
-				whileTap={{ scale: 0.95 }}
-				className="relative w-full bg-normal p-4 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 ease-in-out"
+				initial={{ scale: 1 }}
+				whileHover={{ scale: 1.02 }}
+				transition={{ duration: 0.3 }}
+				className="relative w-full h-64 overflow-hidden rounded-xl"
 			>
-				<motion.div className="w-full h-64 overflow-hidden rounded-lg mb-4">
-					<motion.img
-						whileHover={{ scale: 1.1 }}
-						transition={{ duration: 0.3 }}
-						className="w-full h-full object-cover"
-						src={img}
-						alt={title}
-					/>
-				</motion.div>
-				<motion.div
-					initial={{ opacity: 0.4 }}
-					whileHover={{ opacity: 0.6 }}
-					transition={{ duration: 0.3 }}
-					className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-dark via-transparent to-transparent"
-				></motion.div>
+				<img
+					src={img}
+					alt={title}
+					className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+				/>
+				{/* Gradient overlay */}
+				<div className="absolute inset-0 bg-gradient-to-t from-gradient-end via-gradient-middle to-transparent" />
+				{/* Text */}
 				<motion.h3
-					whileHover={{ y: -5 }}
-					transition={{ duration: 0.3 }}
-					className="absolute bottom-4 left-4 text-normal text-xl font-semibold bg-dark bg-opacity-50 px-3 py-2 rounded-md"
+					initial={{ opacity: 0, y: 10 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5 }}
+					className="absolute bottom-4 left-4 text-xl font-semibold text-card-text z-10"
 				>
 					{title}
 				</motion.h3>
@@ -35,4 +29,5 @@ const Card = ({ img, title }) => {
 		</div>
 	);
 };
+
 export default Card;

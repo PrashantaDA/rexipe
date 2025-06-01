@@ -39,7 +39,7 @@ const Searched = () => {
 					{shouldShowLoadMore && (
 						<div className="flex justify-center mt-8">
 							<button
-								className="px-4 py-2 bg-dark text-primarywhite font-bold rounded my-4"
+								className="px-4 py-2 bg-dark text-primary font-bold rounded my-4 font-handlee"
 								onClick={handleLoadMore}
 							>
 								View More

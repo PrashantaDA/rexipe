@@ -4,7 +4,9 @@ import { motion } from "framer-motion";
 
 // Helper function to handle the active/inactive class names
 const getNavLinkClass = ({ isActive }) =>
-	isActive ? "text-tertiary flex flex-col items-center transition-all duration-300 " : "text-dark hover:text-tertiary flex flex-col items-center transition-all duration-300";
+	isActive
+		? "glass-effect text-accent flex flex-col items-center rounded-xl p-6 transition-all duration-300 shadow-lg"
+		: "glass-effect text-normal hover:text-accent flex flex-col items-center rounded-xl p-6 transition-all duration-300 hover:bg-card-hover hover:shadow-lg";
 
 const Category = ({ title, categories }) => {
 	return (
@@ -13,22 +15,51 @@ const Category = ({ title, categories }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.5 }}
-			className=" bg-gradient-to-br from-secondary via-normal to-secondary my-12"
+			className="glass-effect mx-auto max-w-7xl rounded-2xl p-8 shadow-xl"
 		>
-			<div className="w-[90%] mx-auto">
-				<h2 className="text-5xl font-bold mb-4 text-center text-dark drop-shadow-lg">{title}</h2>
-				<div className="xs:w-[90%] lg:w-[50%] mx-auto flex flex-wrap justify-center items-center gap-10 p-4 bg-primary rounded-lg shadow-lg">
-					{categories.map((category) => (
-						<NavLink
-							key={category.name}
-							to={category.path}
-							className={getNavLinkClass}
+			<div className="mb-12 text-center">
+				<motion.h2
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5 }}
+					className="font-handlee text-5xl font-bold text-accent drop-shadow-lg"
+				>
+					{title}
+				</motion.h2>
+				<motion.p
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5, delay: 0.2 }}
+					className="mt-4 text-lg text-normal/80"
+				>
+					{title === "Diet Categories" ? "Find recipes that match your dietary preferences" : "Explore recipes from different cuisines around the world"}
+				</motion.p>
+			</div>
+
+			<div className="mx-auto grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+				{categories.map((category, index) => (
+					<NavLink
+						key={category.name}
+						to={category.path}
+						className={getNavLinkClass}
+					>
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.3, delay: index * 0.1 }}
+							className="flex flex-col items-center gap-4"
 						>
-							{category.icon}
-							<h4 className="mt-2 text-base">{category.name}</h4>
-						</NavLink>
-					))}
-				</div>
+							<motion.div
+								whileHover={{ scale: 1.1, rotate: 5 }}
+								transition={{ duration: 0.2 }}
+								className="text-4xl text-accent"
+							>
+								{category.icon}
+							</motion.div>
+							<h4 className="text-center text-base font-semibold">{category.name}</h4>
+						</motion.div>
+					</NavLink>
+				))}
 			</div>
 		</motion.div>
 	);

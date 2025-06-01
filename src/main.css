@@ -4,7 +4,45 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-	@apply bg-normal text-primary;
-	font-family: "Handlee", sans-serif;
+@layer base {
+	body {
+		@apply bg-primary text-normal;
+		font-family: "Barlow", sans-serif;
+	}
+
+	/* Apply Handlee font to specific elements */
+	.font-handlee {
+		font-family: "Handlee", cursive;
+	}
+}
+
+@layer components {
+	/* Modern card styles */
+	.modern-card {
+		@apply relative overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300;
+	}
+
+	.modern-card:hover {
+		@apply bg-card-hover shadow-xl -translate-y-1;
+	}
+
+	/* Modern button styles */
+	.modern-button {
+		@apply rounded-lg bg-tertiary px-4 py-2 font-semibold text-normal transition-all duration-300 hover:bg-accent hover:shadow-lg;
+	}
+
+	/* Modern input styles */
+	.modern-input {
+		@apply rounded-lg bg-secondary px-4 py-2 text-normal placeholder:text-normal/60 focus:outline-none focus:ring-2 focus:ring-tertiary;
+	}
+
+	/* Gradient backgrounds */
+	.gradient-bg {
+		@apply bg-gradient-to-br from-gradient-start via-gradient-middle to-gradient-end;
+	}
+
+	/* Glass effect */
+	.glass-effect {
+		@apply bg-secondary/80 backdrop-blur-sm;
+	}
 }

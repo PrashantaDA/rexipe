@@ -3,14 +3,14 @@ import { motion } from "framer-motion";
 
 const Nav = () => {
 	return (
-		<div className="flex text-center justify-between items-center py-4 xs:px-4 md:px-16 gap-8 bg-secondary text-dark shadow-md">
-			<div className="flex items-center xs:flex-">
+		<div className="glass-effect sticky top-0 z-50 flex items-center justify-between gap-8 px-4 py-4 shadow-lg backdrop-blur-sm md:px-16">
+			<div className="flex items-center">
 				<Link to="/">
 					<motion.img
 						initial={{ opacity: 0, rotate: -180, scale: 0.5 }}
 						animate={{ opacity: 1, scale: 1, rotate: 0 }}
 						transition={{ duration: 0.5 }}
-						className="w-[60px] mr-2"
+						className="mr-2 w-[60px]"
 						src={"/logo-no-background.png"}
 						alt="logo"
 					/>
@@ -19,7 +19,7 @@ const Nav = () => {
 					initial={{ opacity: 0, scale: 0.8, x: -54 }}
 					animate={{ opacity: 1, scale: 1, x: 0 }}
 					transition={{ duration: 0.5 }}
-					className="text-sm font-semibold"
+					className="font-handlee text-lg font-semibold text-accent"
 				>
 					Cook with Confidence.
 				</motion.h1>
@@ -32,7 +32,7 @@ const Nav = () => {
 				className="flex items-center gap-2"
 			>
 				<Link
-					className="flex items-center gap-2"
+					className="flex items-center gap-2 transition-colors hover:text-accent"
 					to="https://spoonacular.com/food-api"
 				>
 					<div className="flex flex-col items-center justify-center text-center">
@@ -48,4 +48,5 @@ const Nav = () => {
 		</div>
 	);
 };
+
 export default Nav;

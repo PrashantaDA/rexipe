@@ -4,17 +4,17 @@ import { FaHome } from "react-icons/fa"; // You can use any icon from react-icon
 
 const Breadcrumb = ({ currentPage }) => {
 	return (
-		<nav className="bg-dark py-4 px-4 flex justify-center items-center mb-6  xs:text-sm md:text-2xl">
+		<nav className="glass-effect mb-6 flex items-center justify-center gap-2 py-4 px-4 text-lg">
 			<Link
 				to="/"
-				className="text-tertiary hover:underline flex items-start"
+				className="flex items-center gap-2 text-accent transition-colors hover:text-tertiary"
 			>
-				<FaHome className="mr-2" />
+				<FaHome className="text-xl" />
 				<h4>Home</h4>
 			</Link>
 
-			<span className="mx-2">/</span>
-			<span className="text-primary font-semibold">{currentPage}</span>
+			<span className="text-normal/60">/</span>
+			<span className="font-semibold text-normal">{currentPage}</span>
 		</nav>
 	);
 };

@@ -1,6 +1,6 @@
 import { FaPizzaSlice, FaHamburger } from "react-icons/fa";
 import { FaBowlRice } from "react-icons/fa6";
-import { GiChopsticks, GiNoodles } from "react-icons/gi";
+import { GiChopsticks, GiNoodles, GiBowlOfRice } from "react-icons/gi";
 import Category from "./Category";
 
 const cuisineCategories = [
@@ -27,7 +27,7 @@ const cuisineCategories = [
 	{
 		name: "Indian",
 		path: "/cuisine/Indian",
-		icon: <FaBowlRice className="text-3xl" />,
+		icon: <GiBowlOfRice className="text-3xl" />,
 	},
 	{
 		name: "Korean",

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 
 const Search = () => {
 	const [searchTerm, setSearchTerm] = useState("");
+	const [isFocused, setIsFocused] = useState(false);
 	const navigate = useNavigate();
 
 	const handleChange = (e) => {
@@ -13,14 +14,16 @@ const Search = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		navigate(`/searched/${searchTerm}`);
-		setSearchTerm("");
+		if (searchTerm.trim()) {
+			navigate(`/searched/${searchTerm}`);
+			setSearchTerm("");
+		}
 	};
 
 	return (
 		<motion.form
 			onSubmit={handleSubmit}
-			className="xs:w-4/5 md:w-[70%] mx-auto my-10 shadow-md"
+			className="w-full"
 			initial={{ y: -5 }}
 			animate={{ y: 0 }}
 			transition={{
@@ -30,7 +33,7 @@ const Search = () => {
 			}}
 		>
 			<motion.div
-				className="flex items-center justify-between gap-4 bg-dark bg-opacity-90 text-primary px-4 py-1 rounded-md"
+				className={`glass-effect flex items-center justify-between gap-4 rounded-xl px-6 py-4 shadow-lg transition-all duration-300 ${isFocused ? "ring-2 ring-accent" : ""}`}
 				whileHover={{ scale: 1.01 }}
 				whileTap={{ scale: 0.99 }}
 				transition={{
@@ -39,20 +42,31 @@ const Search = () => {
 					damping: 30,
 				}}
 			>
-				<FaSearch size={20} />
+				<FaSearch className={`text-xl transition-colors duration-300 ${isFocused ? "text-accent" : "text-normal/60"}`} />
 				<motion.input
 					initial={{ opacity: 0.9 }}
 					animate={{ opacity: 1 }}
 					transition={{ duration: 0.2 }}
 					whileTap={{ scale: 0.995 }}
-					className="bg-primary w-full text-normal outline-none border-none p-2 text-xl bg-opacity-0 placeholder:text-normal placeholder:opacity-70"
+					className="modern-input w-full bg-transparent text-lg placeholder:text-normal/60 focus:outline-none"
 					type="text"
 					value={searchTerm}
 					onChange={handleChange}
-					placeholder="Search Recipe..."
+					onFocus={() => setIsFocused(true)}
+					onBlur={() => setIsFocused(false)}
+					placeholder="Search for recipes, cuisines, or ingredients..."
 				/>
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					className="rounded-lg bg-accent px-6 py-2 font-semibold text-primary transition-colors hover:bg-tertiary"
+					type="submit"
+				>
+					Search
+				</motion.button>
 			</motion.div>
 		</motion.form>
 	);
 };
+
 export default Search;
