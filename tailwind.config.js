@@ -16,7 +16,7 @@ export default {
 				secondary: "#2c2d31",
 				tertiary: "#4f46e5",
 				accent: "#818cf8",
-				normal: "#080a0c",
+				normal: "#f0f8ff",
 				dark: "#0f172a",
 				card: "#2c2d31",
 				"card-hover": "#3f4046",
