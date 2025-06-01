@@ -2,6 +2,7 @@ import { AnimatePresence } from "framer-motion";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import BackToTop from "./components/common/BackToTop";
 import Cuisine from "./pages/Cuisine";
 import Featured from "./pages/Featured";
 import Home from "./pages/Home";
@@ -89,6 +90,7 @@ const App = () => {
 			<Navbar />
 			<AnimatedRoutes />
 			<Footer />
+			<BackToTop />
 		</>
 	);
 };

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaGithub, FaUtensils, FaHeart } from "react-icons/fa";
+import { FaUtensils, FaHeart } from "react-icons/fa";
 
 const Footer = () => {
 	const currentYear = new Date().getFullYear();
