@@ -64,4 +64,4 @@ MIT License - feel free to use this project for your own purposes.
 - [Spoonacular API](https://spoonacular.com/food-api) for recipe data
 - [React Icons](https://react-icons.github.io/react-icons/) for beautiful icons
 - [Tailwind CSS](https://tailwindcss.com/) for styling
-- [Framer Motion](https://www.framer.com/motion/) for animations
+- [Framer Motion](https://motion.dev/) for animations
