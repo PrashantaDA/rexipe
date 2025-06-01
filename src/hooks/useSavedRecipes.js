@@ -46,13 +46,22 @@ const useSavedRecipes = () => {
 		}
 	}, [globalSavedRecipes]);
 
+	// Load saved recipes from localStorage on mount
+	useEffect(() => {
+		try {
+			const savedRecipes = JSON.parse(localStorage.getItem(SAVED_RECIPES_KEY) || "[]");
+			globalSavedRecipes = savedRecipes;
+			notifyListeners();
+		} catch (err) {
+			console.error("Error loading saved recipes:", err);
+		}
+	}, []);
+
 	const saveRecipe = useCallback((recipe) => {
 		// Check if recipe is already saved
 		if (!globalSavedRecipes.some((r) => r.id === recipe.id)) {
 			globalSavedRecipes = [...globalSavedRecipes, recipe];
 			notifyListeners();
-		} else {
-			console.log("Recipe already saved:", recipe.id);
 		}
 	}, []);
 

@@ -28,7 +28,7 @@ const Card = ({ img = undefined, image = undefined, title, id, readyInMinutes = 
 			unsaveRecipe(id);
 			setSavedAt(null);
 		} else {
-			saveRecipe({ id, title, img, readyInMinutes, servings, healthScore, savedAt: new Date().toISOString() });
+			saveRecipe({ id, title, img, image, readyInMinutes, servings, healthScore, savedAt: new Date().toISOString() });
 			setSavedAt(new Date());
 		}
 	};
@@ -55,6 +55,9 @@ const Card = ({ img = undefined, image = undefined, title, id, readyInMinutes = 
 					src={img || image}
 					alt={title}
 					className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+					onError={(e) => {
+						console.error("Image failed to load:", { id, title, img, image, error: e });
+					}}
 				/>
 				{/* Save Button */}
 				<button

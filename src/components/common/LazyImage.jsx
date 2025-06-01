@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 
-const LazyImage = ({ src, alt, className, placeholder = "/placeholder.jpg" }) => {
+const LazyImage = ({ src, alt, className, placeholder = "/placeholder.jpg", onError }) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [error, setError] = useState(false);
 	const imgRef = useRef(null);
@@ -39,9 +39,12 @@ const LazyImage = ({ src, alt, className, placeholder = "/placeholder.jpg" }) =>
 		setIsLoaded(true);
 	};
 
-	const handleError = () => {
+	const handleError = (e) => {
 		setError(true);
 		setIsLoaded(true);
+		if (onError) {
+			onError(e);
+		}
 	};
 
 	return (
@@ -90,6 +93,7 @@ LazyImage.propTypes = {
 	alt: PropTypes.string.isRequired,
 	className: PropTypes.string,
 	placeholder: PropTypes.string,
+	onError: PropTypes.func,
 };
 
 export default LazyImage;

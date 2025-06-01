@@ -233,6 +233,7 @@ const SavedRecipes = () => {
 							>
 								<Card
 									img={recipe.img}
+									image={recipe.image}
 									title={recipe.title}
 									id={recipe.id}
 									readyInMinutes={recipe.readyInMinutes}
