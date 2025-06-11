@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHome, FaBookmark, FaUtensils, FaBars, FaTimes, FaChevronDown } from "react-icons/fa";
+import { GrCloudlinux } from "react-icons/gr";
 import { navVariants } from "../utils/animations";
 import useSavedRecipes from "../hooks/useSavedRecipes";
 
@@ -58,6 +59,7 @@ const Navbar = () => {
 
 	const navLinks = [
 		{ path: "/", icon: <FaHome />, label: "Home" },
+		{ path: "/featured", icon: <GrCloudlinux />, label: "Featured" },
 		{ path: "/saved", icon: <FaBookmark />, label: "Saved", badge: savedRecipes.length },
 	];
 
