@@ -1,91 +1,109 @@
 import { useState, useEffect, useCallback } from "react";
 
 const SAVED_RECIPES_KEY = "saved_recipes";
+const SHOPPING_LIST_KEY = "shopping_list";
 
-// Create a singleton to maintain state across component remounts
+// Global singletons to maintain state
 let globalSavedRecipes = [];
+let globalShoppingList = [];
 let listeners = new Set();
 
 const notifyListeners = () => {
-	listeners.forEach((listener) => listener(globalSavedRecipes));
+    listeners.forEach((listener) => listener({ 
+        recipes: globalSavedRecipes, 
+        shopping: globalShoppingList 
+    }));
 };
 
 const useSavedRecipes = () => {
-	const [savedRecipes, setSavedRecipes] = useState(() => {
-		// Initialize from localStorage on first mount
-		try {
-			const saved = localStorage.getItem(SAVED_RECIPES_KEY);
-			if (saved) {
-				const parsed = JSON.parse(saved);
-				globalSavedRecipes = parsed;
-				return parsed;
-			}
-		} catch (err) {
-			console.error("Error loading saved recipes:", err);
-		}
-		return globalSavedRecipes;
-	});
+    const [state, setState] = useState(() => {
+        try {
+            const saved = localStorage.getItem(SAVED_RECIPES_KEY);
+            const shopping = localStorage.getItem(SHOPPING_LIST_KEY);
+            
+            if (saved) globalSavedRecipes = JSON.parse(saved);
+            if (shopping) globalShoppingList = JSON.parse(shopping);
+            
+            return { recipes: globalSavedRecipes, shopping: globalShoppingList };
+        } catch (err) {
+            console.error("Error loading state:", err);
+            return { recipes: [], shopping: [] };
+        }
+    });
 
-	// Subscribe to global state changes
-	useEffect(() => {
-		const listener = (newRecipes) => {
-			setSavedRecipes(newRecipes);
-		};
-		listeners.add(listener);
-		return () => {
-			listeners.delete(listener);
-		};
-	}, []);
+    useEffect(() => {
+        const listener = (newState) => setState(newState);
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+    }, []);
 
-	// Save to localStorage whenever global state changes
-	useEffect(() => {
-		try {
-			localStorage.setItem(SAVED_RECIPES_KEY, JSON.stringify(globalSavedRecipes));
-		} catch (err) {
-			console.error("Error saving recipes:", err);
-		}
-	}, [globalSavedRecipes]);
+    // RECIPE ACTIONS
+    const saveRecipe = useCallback((recipe) => {
+        if (!globalSavedRecipes.some((r) => r.id === recipe.id)) {
+            globalSavedRecipes = [...globalSavedRecipes, recipe];
+            localStorage.setItem(SAVED_RECIPES_KEY, JSON.stringify(globalSavedRecipes));
+            notifyListeners();
+        }
+    }, []);
 
-	// Load saved recipes from localStorage on mount
-	useEffect(() => {
-		try {
-			const savedRecipes = JSON.parse(localStorage.getItem(SAVED_RECIPES_KEY) || "[]");
-			globalSavedRecipes = savedRecipes;
-			notifyListeners();
-		} catch (err) {
-			console.error("Error loading saved recipes:", err);
-		}
-	}, []);
+    const unsaveRecipe = useCallback((recipeId) => {
+        globalSavedRecipes = globalSavedRecipes.filter((r) => r.id !== recipeId);
+        localStorage.setItem(SAVED_RECIPES_KEY, JSON.stringify(globalSavedRecipes));
+        notifyListeners();
+    }, []);
 
-	const saveRecipe = useCallback((recipe) => {
-		// Check if recipe is already saved
-		if (!globalSavedRecipes.some((r) => r.id === recipe.id)) {
-			globalSavedRecipes = [...globalSavedRecipes, recipe];
-			notifyListeners();
-		}
-	}, []);
+    const isRecipeSaved = useCallback((recipeId) => {
+        return globalSavedRecipes.some((r) => r.id === recipeId);
+    }, []);
 
-	const unsaveRecipe = useCallback((recipeId) => {
-		globalSavedRecipes = globalSavedRecipes.filter((recipe) => recipe.id !== recipeId);
-		notifyListeners();
-	}, []);
+    // SHOPPING LIST ACTIONS
+    const addToShoppingList = useCallback((item) => {
+        // item: { id, name, amount, unit, image }
+        if (!globalShoppingList.some((i) => i.id === item.id)) {
+            globalShoppingList = [...globalShoppingList, { ...item, completed: false }];
+            localStorage.setItem(SHOPPING_LIST_KEY, JSON.stringify(globalShoppingList));
+            notifyListeners();
+        }
+    }, []);
 
-	const isRecipeSaved = useCallback((recipeId) => {
-		return globalSavedRecipes.some((recipe) => recipe.id === recipeId);
-	}, []);
+    const removeFromShoppingList = useCallback((itemId) => {
+        globalShoppingList = globalShoppingList.filter((i) => i.id !== itemId);
+        localStorage.setItem(SHOPPING_LIST_KEY, JSON.stringify(globalShoppingList));
+        notifyListeners();
+    }, []);
 
-	const clearSavedRecipes = useCallback(() => {
-		globalSavedRecipes = [];
-		notifyListeners();
-	}, []);
+    const toggleShoppingItem = useCallback((itemId) => {
+        globalShoppingList = globalShoppingList.map((i) => 
+            i.id === itemId ? { ...i, completed: !i.completed } : i
+        );
+        localStorage.setItem(SHOPPING_LIST_KEY, JSON.stringify(globalShoppingList));
+        notifyListeners();
+    }, []);
 
-	return {
-		savedRecipes,
-		saveRecipe,
-		unsaveRecipe,
-		isRecipeSaved,
-		clearSavedRecipes,
-	};
+    const clearSavedRecipes = useCallback(() => {
+        globalSavedRecipes = [];
+        localStorage.setItem(SAVED_RECIPES_KEY, JSON.stringify(globalSavedRecipes));
+        notifyListeners();
+    }, []);
+
+    const clearShoppingList = useCallback(() => {
+        globalShoppingList = [];
+        localStorage.setItem(SHOPPING_LIST_KEY, JSON.stringify(globalShoppingList));
+        notifyListeners();
+    }, []);
+
+    return {
+        savedRecipes: state.recipes,
+        shoppingList: state.shopping,
+        saveRecipe,
+        unsaveRecipe,
+        isRecipeSaved,
+        addToShoppingList,
+        removeFromShoppingList,
+        toggleShoppingItem,
+        clearShoppingList,
+        clearSavedRecipes
+    };
 };
 
 export default useSavedRecipes;

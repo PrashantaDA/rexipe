@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Handlee&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -7,33 +7,41 @@
 @layer base {
 	body {
 		@apply bg-primary text-normal;
-		font-family: "Barlow", sans-serif;
+		font-family: "Inter", sans-serif;
 	}
 
-	/* Apply Handlee font to specific elements */
-	.font-handlee {
-		font-family: "Handlee", cursive;
+	/* Apply Outfit font to specific elements */
+	.font-outfit {
+		font-family: "Outfit", sans-serif;
 	}
 }
 
 @layer components {
-	/* Modern card styles */
+	/* Gourmet Card styles */
 	.modern-card {
-		@apply relative overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300;
+		@apply relative overflow-hidden rounded-2xl bg-card shadow-lg transition-all duration-500 ease-out;
+		border: 1px solid rgba(251, 113, 133, 0.1);
 	}
 
 	.modern-card:hover {
-		@apply bg-card-hover shadow-xl -translate-y-1;
+		@apply -translate-y-2 shadow-2xl;
+		border-color: rgba(251, 113, 133, 0.3);
+		box-shadow: 0 20px 25px -5px rgba(225, 29, 72, 0.1), 0 10px 10px -5px rgba(225, 29, 72, 0.04);
 	}
 
-	/* Modern button styles */
+	/* Gourmet button styles */
 	.modern-button {
-		@apply rounded-lg bg-tertiary px-4 py-2 font-semibold text-normal transition-all duration-300 hover:bg-accent hover:shadow-lg;
+		@apply relative overflow-hidden rounded-full bg-accent px-6 py-2.5 font-semibold text-normal transition-all duration-300 hover:bg-accent-light active:scale-95;
+		box-shadow: 0 4px 6px -1px rgba(225, 29, 72, 0.2);
+	}
+
+	.modern-button:hover {
+		box-shadow: 0 10px 15px -3px rgba(225, 29, 72, 0.3);
 	}
 
 	/* Modern input styles */
 	.modern-input {
-		@apply rounded-lg bg-secondary px-4 py-2 text-normal placeholder:text-normal/60 focus:outline-none focus:ring-2 focus:ring-tertiary;
+		@apply rounded-xl border border-white/10 bg-secondary/50 px-4 py-3 text-normal placeholder:text-normal/40 focus:border-accent/50 focus:outline-none focus:ring-4 focus:ring-accent/10;
 	}
 
 	/* Gradient backgrounds */
@@ -41,8 +49,12 @@
 		@apply bg-gradient-to-br from-gradient-start via-gradient-middle to-gradient-end;
 	}
 
-	/* Glass effect */
+	/* Premium Glass effect */
 	.glass-effect {
-		@apply bg-secondary/80 backdrop-blur-sm;
+		@apply border border-white/10 bg-secondary/40 backdrop-blur-md;
+	}
+
+	.glass-card {
+		@apply border border-white/5 bg-white/5 backdrop-blur-xl;
 	}
 }

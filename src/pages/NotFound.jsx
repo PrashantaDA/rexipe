@@ -89,7 +89,7 @@ const NotFound = () => {
 				{/* Message */}
 				<motion.h1
 					variants={itemVariants}
-					className="mb-4 font-handlee text-4xl font-bold text-accent md:text-5xl"
+					className="mb-4 font-outfit text-4xl font-bold text-accent md:text-5xl"
 				>
 					Oops! Recipe Not Found
 				</motion.h1>

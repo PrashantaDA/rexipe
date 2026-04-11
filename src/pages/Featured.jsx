@@ -7,281 +7,171 @@ import LoadingSpinner from "../components/common/LoadingSpinner";
 import ErrorState from "../components/common/ErrorState";
 import { pageVariants, containerVariants, itemVariants } from "../utils/animations";
 import { commonStyles } from "../utils/styles";
+import { useToast } from "../components/common/Toast";
 
 const CACHE_KEY = "featured_recipes";
 const CACHE_TIMESTAMP_KEY = "featured_recipes_timestamp";
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 const Featured = () => {
-	const [recipes, setRecipes] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState(null);
-	const [lastUpdated, setLastUpdated] = useState(null);
-	const [isRefreshing, setIsRefreshing] = useState(false);
-	const [showToast, setShowToast] = useState(false);
-	const [toastMessage, setToastMessage] = useState("");
+    const [recipes, setRecipes] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [lastUpdated, setLastUpdated] = useState(null);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const { addToast } = useToast();
 
-	const isCacheValid = () => {
-		const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-		if (!timestamp) return false;
+    const isCacheValid = () => {
+        const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+        if (!timestamp) return false;
+        return Date.now() - parseInt(timestamp) < CACHE_DURATION;
+    };
 
-		const lastFetchTime = parseInt(timestamp);
-		const currentTime = Date.now();
-		return currentTime - lastFetchTime < CACHE_DURATION;
-	};
+    const getCachedRecipes = () => {
+        try {
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+            if (cachedData && timestamp) {
+                setLastUpdated(new Date(parseInt(timestamp)));
+                return JSON.parse(cachedData);
+            }
+        } catch (err) {
+            console.error("Error reading cache:", err);
+            localStorage.removeItem(CACHE_KEY);
+        }
+        return null;
+    };
 
-	const getCachedRecipes = () => {
-		try {
-			const cachedData = localStorage.getItem(CACHE_KEY);
-			const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-			if (cachedData && timestamp) {
-				const recipes = JSON.parse(cachedData);
-				setLastUpdated(new Date(parseInt(timestamp)));
-				return recipes;
-			}
-		} catch (err) {
-			console.error("Error reading cache:", err);
-			clearCache(); // Clear invalid cache
-		}
-		return null;
-	};
+    const cacheRecipes = (recipesData) => {
+        try {
+            const timestamp = Date.now();
+            localStorage.setItem(CACHE_KEY, JSON.stringify(recipesData));
+            localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
+            setLastUpdated(new Date(timestamp));
+        } catch (err) {
+            console.error("Error caching recipes:", err);
+        }
+    };
 
-	const cacheRecipes = (recipesData) => {
-		try {
-			const timestamp = Date.now();
-			localStorage.setItem(CACHE_KEY, JSON.stringify(recipesData));
-			localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
-			setLastUpdated(new Date(timestamp));
-		} catch (err) {
-			console.error("Error caching recipes:", err);
-			showToastMessage("Failed to cache recipes. Please try again.");
-		}
-	};
+    const clearCache = () => {
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+        setLastUpdated(null);
+        setRecipes([]);
+        addToast("Cache cleared", "info");
+        fetchRandomRecipes(true);
+    };
 
-	const clearCache = () => {
-		try {
-			localStorage.removeItem(CACHE_KEY);
-			localStorage.removeItem(CACHE_TIMESTAMP_KEY);
-			setLastUpdated(null);
-			setRecipes([]); // Clear recipes from state
-			showToastMessage("Cache cleared successfully!");
-			// Fetch new recipes after clearing cache
-			fetchRandomRecipes(true);
-		} catch (err) {
-			console.error("Error clearing cache:", err);
-			showToastMessage("Failed to clear cache. Please try again.");
-		}
-	};
+    const fetchRandomRecipes = async (forceRefresh = false) => {
+        try {
+            setIsLoading(true);
+            setError(null);
 
-	const showToastMessage = (message) => {
-		setToastMessage(message);
-		setShowToast(true);
-		setTimeout(() => setShowToast(false), 3000);
-	};
+            if (!forceRefresh && isCacheValid()) {
+                const cached = getCachedRecipes();
+                if (cached && cached.length > 0) {
+                    setRecipes(cached);
+                    setIsLoading(false);
+                    return;
+                }
+            }
 
-	const fetchRandomRecipes = async (forceRefresh = false) => {
-		try {
-			setIsLoading(true);
-			setError(null);
+            setIsRefreshing(true);
+            const response = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${import.meta.env.VITE_API_KEY}&number=12&tags=main course`);
 
-			// Check cache only if not forcing refresh
-			if (!forceRefresh && isCacheValid()) {
-				const cachedRecipes = getCachedRecipes();
-				if (cachedRecipes && cachedRecipes.length > 0) {
-					setRecipes(cachedRecipes);
-					setIsLoading(false);
-					return;
-				}
-			}
+            if (!response.ok) throw new Error("API Limit reached or network error.");
 
-			setIsRefreshing(true);
-			const response = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${import.meta.env.VITE_API_KEY}&number=18&tags=main course`);
+            const data = await response.json();
+            const recipesData = data.recipes || [];
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				throw new Error(errorData.message || "Failed to fetch recipes. Please try again later.");
-			}
+            cacheRecipes(recipesData);
+            setRecipes(recipesData);
+            if (forceRefresh) addToast("Gourmet selection refreshed!");
+        } catch (err) {
+            setError(err.message);
+            const cached = getCachedRecipes();
+            if (cached) setRecipes(cached);
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
+        }
+    };
 
-			const data = await response.json();
-			const recipesData = data.recipes || [];
+    useEffect(() => {
+        fetchRandomRecipes();
+    }, []);
 
-			if (recipesData.length === 0) {
-				throw new Error("No recipes found. Please try again.");
-			}
+    if (isLoading) return <LoadingSpinner />;
+    if (error && recipes.length === 0) return <ErrorState message={error} onRetry={() => fetchRandomRecipes(true)} />;
 
-			cacheRecipes(recipesData);
-			setRecipes(recipesData);
-			showToastMessage(forceRefresh ? "Recipes refreshed successfully!" : "Recipes loaded successfully!");
-		} catch (err) {
-			console.error("Error fetching recipes:", err);
-			setError(err.message);
-			showToastMessage(err.message || "Failed to update recipes. Please try again.");
-			// If there's an error and we have cached data, use it as fallback
-			const cachedRecipes = getCachedRecipes();
-			if (cachedRecipes && cachedRecipes.length > 0) {
-				setRecipes(cachedRecipes);
-				showToastMessage("Using cached recipes due to fetch error.");
-			}
-		} finally {
-			setIsLoading(false);
-			setIsRefreshing(false);
-		}
-	};
+    return (
+        <motion.div
+            variants={pageVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className={`min-h-screen pt-32 pb-20 ${commonStyles.gradientBg}`}
+        >
+            <div className={commonStyles.container}>
+                {/* Header Section */}
+                <div className="mb-16 flex flex-col items-center text-center">
+                    <motion.div
+                        variants={itemVariants}
+                        className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/20 text-accent"
+                    >
+                        <FaRandom className="h-8 w-8" />
+                    </motion.div>
+                    <h1 className={commonStyles.heading2}>Daily Featured</h1>
+                    <p className={commonStyles.subtitle}>Handpicked gourmet inspirations for your next meal.</p>
 
-	useEffect(() => {
-		fetchRandomRecipes();
-	}, []);
+                    <div className="mt-8 flex items-center gap-4">
+                        <button
+                            onClick={() => fetchRandomRecipes(true)}
+                            disabled={isRefreshing}
+                            className={`${commonStyles.button.primary} flex items-center gap-2`}
+                        >
+                            <FaSync className={isRefreshing ? "animate-spin" : ""} /> Refresh
+                        </button>
+                        <button
+                            onClick={clearCache}
+                            className={commonStyles.button.secondary}
+                        >
+                            Clear Cache
+                        </button>
+                    </div>
+                    
+                    {lastUpdated && (
+                        <p className="mt-4 text-[10px] uppercase font-bold tracking-widest text-white/20">
+                            Last Refreshed: {lastUpdated.toLocaleTimeString()}
+                        </p>
+                    )}
+                </div>
 
-	if (isLoading) {
-		return <LoadingSpinner />;
-	}
-
-	if (error) {
-		return (
-			<ErrorState
-				message={error}
-				onRetry={() => fetchRandomRecipes(true)}
-			/>
-		);
-	}
-
-	return (
-		<motion.div
-			variants={pageVariants}
-			initial="hidden"
-			animate="visible"
-			exit="exit"
-			className={commonStyles.gradientBg}
-		>
-			{/* Background Pattern */}
-			<div className={commonStyles.dotPattern} />
-
-			<div className={commonStyles.container}>
-				{/* Header Section */}
-				<motion.div
-					variants={containerVariants}
-					initial="hidden"
-					animate="visible"
-					className="mb-12 text-center"
-				>
-					<motion.div
-						variants={itemVariants}
-						className="mb-6 inline-block"
-					>
-						<FaRandom className="h-12 w-12 text-accent" />
-					</motion.div>
-					<motion.h1
-						variants={itemVariants}
-						className={commonStyles.heading1}
-					>
-						Featured Recipes
-					</motion.h1>
-					<motion.p
-						variants={itemVariants}
-						className={commonStyles.subtitle}
-					>
-						Discover our daily curated selection of delicious recipes
-					</motion.p>
-
-					{/* Action Buttons */}
-					<motion.div
-						variants={itemVariants}
-						className="mt-6 flex flex-wrap items-center justify-center gap-4"
-					>
-						<button
-							type="button"
-							onClick={() => fetchRandomRecipes(true)}
-							disabled={isRefreshing}
-							className={`${commonStyles.button.primary} flex items-center gap-2 relative z-10`}
-						>
-							<FaSync className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-							<span>Refresh Recipes</span>
-						</button>
-						<button
-							type="button"
-							onClick={clearCache}
-							className={`${commonStyles.button.secondary} flex items-center gap-2 relative z-10`}
-						>
-							<FaTrash className="h-4 w-4" />
-							<span>Clear Cache</span>
-						</button>
-					</motion.div>
-
-					{/* Last Updated */}
-					{lastUpdated && (
-						<motion.div
-							variants={itemVariants}
-							className="mt-4 flex items-center justify-center gap-2 text-sm text-normal/60"
-						>
-							<FaClock className="h-4 w-4" />
-							<span>Last updated: {lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-						</motion.div>
-					)}
-				</motion.div>
-
-				{/* Toast Notification */}
-				<AnimatePresence>
-					{showToast && (
-						<motion.div
-							initial={{ opacity: 0, y: 50 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: 50 }}
-							className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 transform"
-						>
-							<div className={commonStyles.glassCard}>{toastMessage}</div>
-						</motion.div>
-					)}
-				</AnimatePresence>
-
-				{/* Recipes Grid */}
-				<motion.div
-					variants={containerVariants}
-					initial="hidden"
-					animate="visible"
-					className={commonStyles.grid.responsive}
-				>
-					{recipes.map((recipe) => (
-						<motion.div
-							key={recipe.id}
-							variants={itemVariants}
-							whileHover={{ y: -4 }}
-							className="group"
-						>
-							<Link to={`/recipe/${recipe.id}`}>
-								<Card
-									image={recipe.image}
-									title={recipe.title}
-									id={recipe.id}
-									readyInMinutes={recipe.readyInMinutes}
-									servings={recipe.servings}
-									healthScore={recipe.healthScore}
-								/>
-							</Link>
-						</motion.div>
-					))}
-				</motion.div>
-
-				{/* Empty State */}
-				{recipes.length === 0 && (
-					<motion.div
-						variants={itemVariants}
-						className={commonStyles.empty}
-					>
-						<FaUtensils className="mx-auto mb-4 h-12 w-12 text-accent" />
-						<h3 className={commonStyles.heading3}>No Recipes Found</h3>
-						<p className="mb-4 text-normal/80">We couldn&apos;t find any recipes at the moment. Please try again later.</p>
-						<button
-							type="button"
-							onClick={() => fetchRandomRecipes(true)}
-							className={`${commonStyles.button.primary} relative z-10`}
-						>
-							Try Again
-						</button>
-					</motion.div>
-				)}
-			</div>
-		</motion.div>
-	);
+                {/* Grid */}
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className={commonStyles.grid.responsive}
+                >
+                    {recipes.map((recipe) => (
+                        <motion.div key={recipe.id} variants={itemVariants}>
+                            <Link to={`/recipe/${recipe.id}`}>
+                                <Card
+                                    image={recipe.image}
+                                    title={recipe.title}
+                                    id={recipe.id}
+                                    readyInMinutes={recipe.readyInMinutes}
+                                    servings={recipe.servings}
+                                    healthScore={recipe.healthScore}
+                                />
+                            </Link>
+                        </motion.div>
+                    ))}
+                </motion.div>
+            </div>
+        </motion.div>
+    );
 };
 
 export default Featured;

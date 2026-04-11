@@ -57,7 +57,7 @@ const Popular = () => {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
-					className="font-handlee text-5xl font-bold text-accent drop-shadow-lg"
+					className="font-outfit text-5xl font-bold text-accent drop-shadow-lg"
 				>
 					Popular Picks
 				</motion.h2>

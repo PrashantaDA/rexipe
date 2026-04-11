@@ -23,7 +23,7 @@ const Footer = () => {
 								<div className="absolute -inset-1 rounded-full bg-gradient-to-r from-accent/30 via-accent/20 to-accent/10 blur-sm" />
 								<FaUtensils className="relative h-6 w-6 text-accent" />
 							</div>
-							<span className="bg-gradient-to-br from-accent via-accent/90 to-accent/80 bg-clip-text text-xl font-bold text-transparent font-handlee">Rexipe</span>
+							<span className="bg-gradient-to-br from-accent via-accent/90 to-accent/80 bg-clip-text text-xl font-bold text-transparent font-outfit">Rexipe</span>
 						</Link>
 						<p className="text-sm text-white/60">Discover, save, and cook amazing recipes from around the world. Your personal recipe companion.</p>
 					</div>

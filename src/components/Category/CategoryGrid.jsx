@@ -48,7 +48,7 @@ const CategoryGrid = ({ items, category, type, initialDisplayCount = 8 }) => {
 					<motion.button
 						whileHover={{ scale: 1.05 }}
 						whileTap={{ scale: 0.95 }}
-						className="glass-effect rounded-xl px-8 py-3 font-handlee text-lg font-semibold text-accent shadow-lg transition-all duration-300 hover:bg-card-hover hover:shadow-xl"
+						className="glass-effect rounded-xl px-8 py-3 font-outfit text-lg font-semibold text-accent shadow-lg transition-all duration-300 hover:bg-card-hover hover:shadow-xl"
 						onClick={handleViewMore}
 					>
 						Load More Recipes

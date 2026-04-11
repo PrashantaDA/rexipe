@@ -41,7 +41,7 @@ const Category = ({ title, categories, type }) => {
 				<div className="text-center">
 					<motion.h2
 						variants={itemVariants}
-						className="mb-4 font-handlee text-4xl font-bold text-accent md:text-5xl"
+						className="mb-4 font-outfit text-4xl font-bold text-accent md:text-5xl"
 					>
 						{title}
 					</motion.h2>
@@ -98,7 +98,7 @@ const Category = ({ title, categories, type }) => {
 									</motion.div>
 
 									{/* Category Name */}
-									<h3 className="mb-4 font-handlee text-3xl font-bold text-white drop-shadow-lg">{category.name}</h3>
+									<h3 className="mb-4 font-outfit text-3xl font-bold text-white drop-shadow-lg">{category.name}</h3>
 
 									{/* Explore Button */}
 									<motion.div
